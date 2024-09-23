@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import csv
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from datetime import datetime

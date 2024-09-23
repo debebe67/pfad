@@ -1,6 +1,5 @@
 requests
-lxml
-BeautifulSoup
-matplotlib.pyplot
+bs4
+matplotlib
 collections
 datetime
