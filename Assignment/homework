@@ -1,0 +1,64 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+import matplotlib.pyplot as plt
+from collections import defaultdict
+from datetime import datetime
+
+response = requests.get("https://www.hko.gov.hk/tide/eCMWtext2026.html")
+if response.ok:
+    print(response.text) 
+else:
+    print("Failed to retrieve page")
+
+url = 'https://www.hko.gov.hk/tide/eTAOtext2026.html'
+response = requests.get(url)
+if response.status_code ==200:
+    soup = BeautifulSoup(response.text, 'html.parser')
+    rows = soup.find_all("tr")
+
+    date_maxtem = defaultdict(list)
+
+    for row in rows[1:]:
+        cell = row.find_all("td")
+
+        if len(cell) >= 10:
+            month = cell[0].get_text().strip()
+            day = cell[1].get_text().strip()
+            date_format = f"2026-{month}-{day}"
+            date = datetime.strptime(date_format, '%Y-%m-%d')
+
+        tides = []
+        for i in [3,5,7,9]:
+            try:
+                tide_text = cell[i].get_text().strip()
+                if tide_text:
+                    tide = float(tide_text)
+                    tides.append(tide)
+            except IndexError:
+                continue
+        if tides:
+            maxtem = max(tides)
+            date_maxtem[date].append(maxtem)
+        start_date = 1
+        end_date = 31
+        dates = list(date_maxtem.keys())[start_date-1:end_date-1]
+        date_maxtems = []
+        for date in dates:
+            date_maxtems.append(date_maxtem[date])
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(dates, date_maxtems, marker='o', linestyle='-', color='b')
+
+    # The chart
+    plt.title(f"2026 Daily Max Tide Levels (From Jan{start_date} to Jan{end_date})", fontsize=14)
+    plt.xlabel("Date", fontsize=12)
+    plt.ylabel("Max Tide Level (m)", fontsize=12)
+    plt.xticks(rotation=45, ha='right')  
+    plt.grid(True)
+
+    # Display
+    plt.tight_layout()
+    plt.show()
+else:
+    print(f"Failed to retrieve the page. Status code: {response.status_code}")

@@ -1,0 +1,6 @@
+requests
+lxml
+BeautifulSoup
+matplotlib.pyplot
+collections
+datetime
